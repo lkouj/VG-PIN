@@ -1,0 +1,151 @@
+import sys
+import torch
+from collections import OrderedDict
+# from plotting import newfig, savefig
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy.io
+from scipy.interpolate import griddata
+import matplotlib.gridspec as gridspec
+
+from pyDOE import lhs
+import pandas as pd
+import itertools
+import time
+import random
+
+import warnings
+import math
+warnings.filterwarnings('ignore')
+
+
+
+# np.random.seed(1234)
+
+# CUDA support/看看你的GPU能不能跑
+if torch.cuda.is_available():
+    device = torch.device('cuda')
+    print('GPU')
+else:
+    device = torch.device('cpu')
+    print('CPU')
+
+
+
+
+def MLinear(in_features, out_features):
+    weight = torch.nn.Parameter(torch.Tensor(out_features, in_features)).to(device)
+    bias = torch.nn.Parameter(torch.Tensor(out_features)).to(device)
+    #std = gain * sqrt(6 / fan_in + fan_out)
+    torch.nn.init.xavier_uniform_(weight, gain=0.57735)
+    torch.nn.init.zeros_(bias)
+    return weight, bias
+
+
+
+# the deep neural network/深度神经网络
+class DNN(torch.nn.Module):
+    def __init__(self, layers):
+        super(DNN, self).__init__()
+
+        self.depth = len(layers) - 1
+        self.activation_tanh = torch.nn.Tanh
+
+        layer_list = list()
+        for i in range(self.depth - 1):
+            layer_list.append(('layer_%d' % i, torch.nn.Linear(layers[i], layers[i + 1])))
+            layer_list.append(('activation_%d' % i, self.activation_tanh()))
+        layer_list.append(('layer_%d' % (self.depth - 1), torch.nn.Linear(layers[-2], layers[-1])))
+
+        layerDict = OrderedDict(layer_list)
+
+        # deploy layers
+        self.layers = torch.nn.Sequential(layerDict)
+
+        # xavier_initialize
+        for each_layer in self.layers:
+            if isinstance(each_layer, torch.nn.Linear):
+                torch.nn.init.xavier_uniform_(each_layer.weight, gain=1)
+                torch.nn.init.zeros_(each_layer.bias)
+        print('xavier_initialize_done')
+
+    def forward(self, x):
+        out = self.layers(x)
+        return out
+
+
+# the physics-guided neural network/嵌入物理机制
+class PhysicsInformedNN():
+    def __init__(self, X_star_net,
+                 X_train, theta_train,
+                 psi_layers,k_layers,theta_layers,
+                 X_rre,lb, ub,
+                 display_net,
+                 upper_net,sub_net,
+                 X_train_dense,theta_train_dense,
+                 rainfall_ave,rainfall):
+
+
+
+
+
+####
+
+
+
+COMING SOON
+
+
+
+####
+
+
+
+
+
+
+    dataset_result = pd.DataFrame({'z': z_net_display.flatten(),
+                                   't': t_net_display.flatten(),
+                                   'psi_pred':psi_pred.detach().cpu().numpy().flatten(),
+                                   'theta_pred': theta_pred.detach().cpu().numpy().flatten(),
+                                   'K_pred': k_pred.detach().cpu().numpy().flatten(),
+                                   'theta_t_pred': theta_t_pred.detach().cpu().numpy().flatten(),
+                                   'psi_z_pred': psi_z_pred.detach().cpu().numpy().flatten(),
+                                   'psi_zz_pred': psi_zz_pred.detach().cpu().numpy().flatten(),
+                                   'k_z_pred': k_z_pred.detach().cpu().numpy().flatten(),
+                                   'f_pred': f_pred.detach().cpu().numpy().flatten(),
+                                   'flux_pred': flux_pred.detach().cpu().numpy().flatten()})
+
+    data_rre_load = "D:/Desktop/result_"+str(seed)+str(theta_lamda)+str(rre_lamda)+str(up_flux_lamda)+"03-07.csv"
+    dataset_result.to_csv(data_rre_load)
+
+
+
+    psi_log10=torch.arange(-5, 3.5, 0.02).to(device)
+    psi_log10=psi_log10.view([len(psi_log10),1])
+    psi=-10**(psi_log10.detach().cpu().numpy())
+    WRCs, HCFs = model.WRC_HCF(-psi_log10)
+
+
+    dataset_cons=pd.DataFrame({'psi': psi.flatten(),
+                                'theta':WRCs.detach().cpu().numpy().flatten(),
+                                'k': HCFs.detach().cpu().numpy().flatten(),
+                                '-log[-psi]':-psi_log10.detach().cpu().numpy().flatten()})
+
+    data_rre_load = "D:/Desktop/RRE_"+str(seed)+str(theta_lamda)+str(rre_lamda)+str(up_flux_lamda)+"03-07.csv"
+    dataset_cons.to_csv(data_rre_load)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
