@@ -1,2 +1,2 @@
-# VG-PIN
+# VG-PINN
 VG-PINN
